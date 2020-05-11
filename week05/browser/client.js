@@ -25,20 +25,22 @@ class Request {
     this.headers['Content-Length'] = this.bodyContent.length;
   }
 
-  toString() {
-    return `${this.method} ${this.path} HTTP/1.1\r
-${Object.keys(this.headers)
-  .map((key) => `${key}: ${this.headers[key]}`)
-  .join('\r\n')}\r
-\r
-${this.bodyContent}`;
+  get requestText() {
+    return [
+      `${this.method} ${this.path} HTTP/1.1`,
+      `${Object.keys(this.headers)
+        .map((key) => `${key}: ${this.headers[key]}`)
+        .join('\r\n')}`,
+      '',
+      `${this.bodyContent}`,
+    ].join('\r\n');
   }
 
   send(connection) {
     return new Promise((resolve, reject) => {
       const parser = new ResponseParse();
       if (connection) {
-        connection.write(this.toString());
+        connection.write(this.requestText);
       } else {
         connection = net.createConnection(
           {
@@ -46,7 +48,7 @@ ${this.bodyContent}`;
             port: this.port,
           },
           () => {
-            connection.write(this.toString());
+            connection.write(this.requestText);
           }
         );
       }
@@ -55,7 +57,6 @@ ${this.bodyContent}`;
         parser.receive(data.toString());
         // console.log(parser.statusLine);
         // console.log(parser.headers);
-
         if (parser.isFinished) {
           resolve(parser.response);
           connection.end();
@@ -110,9 +111,10 @@ class ResponseParse {
   }
 
   receive(str) {
-    [...str].forEach((c) => {
+    for (const c of [...str]) {
+      if (this.isFinished) break;
       this.receiveChar(c);
-    });
+    }
   }
 
   receiveChar(char) {
@@ -181,18 +183,14 @@ class ChunkedBodyParser {
   }
 
   receiveChar(char) {
+    // console.log(JSON.stringify(char));
     if (this.currentStatus === this.WAITING_LENGTH) {
       if (char === '\r') {
-        this.isFinished = this.length === 0;
         this.currentStatus = this.WAITING_LENGTH_LINE_END;
-
-        if (this.isFinished) {
-          // TODO currentStatus
-          console.log(this.content);
-        }
       } else {
-        this.length *= 10;
-        this.length += char.charCodeAt(0) - '0'.charCodeAt(0);
+        this.length *= 16;
+        this.length += parseInt(char, 16);
+        this.isFinished = this.length === 0;
       }
     } else if (this.currentStatus === this.WAITING_LENGTH_LINE_END) {
       if (char === '\n') {
@@ -233,7 +231,7 @@ void (async function () {
   });
 
   let response = await request.send();
-  console.log(JSON.stringify(response));
+  console.log(response);
 })();
 
 /*const client = net.createConnection(
