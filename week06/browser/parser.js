@@ -1,22 +1,27 @@
 let state = data;
 let EOF = Symbol('EOF');
-let currentToken = {};
+let currentToken = null;
 
 module.exports.parseHTML = function parseHTML(html) {
-  console.log(html);
-
-  [...html].forEach((c) => {
+  // console.log(html);
+  for (const c of html) {
     state = state(c);
-  });
-
+  }
   state = state(EOF);
 };
+
+function emit(token) {
+  console.log(token);
+}
 
 function data(c) {
   if (c === '<') {
     return tagOpen;
   } else if (c === EOF) {
+    emit({ type: 'EOF' });
     return;
+  } else {
+    emit({ type: 'text', content: c });
   }
   return data;
 }
@@ -25,6 +30,10 @@ function tagOpen(c) {
   if (c === '/') {
     return endTagOpen;
   } else if (c.match(/^[a-z]$/i)) {
+    currentToken = {
+      type: 'startTag',
+      tagName: '',
+    };
     return tagName(c);
   } else {
     return;
@@ -50,9 +59,11 @@ function tagName(c) {
   } else if (c === '/') {
     return selfClosingStartTag;
   } else if (c.match(/^[a-z]$/i)) {
-    console.log(c);
+    // console.log(c);
+    currentToken.tagName += c;
     return tagName;
   } else if (c === '>') {
+    emit(currentToken);
     return data;
   } else {
     return tagName;
