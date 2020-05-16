@@ -27,7 +27,7 @@ const server = http.createServer((req, res) => {
             <img id='myid2'/>
             <input name="username" placeHolders='user Name' type='text' required/>
         </div>
-        </hr>
+        <hr/>
     </body>
     </html>`;
   res.end(body);

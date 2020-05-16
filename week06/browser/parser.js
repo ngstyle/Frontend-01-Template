@@ -16,7 +16,35 @@ module.exports.parseHTML = function parseHTML(html) {
 };
 
 function emit(token) {
-  if (token[tokenType] !== 'text') console.log(token);
+  if (token[tokenType] === 'text') return;
+  // if (token[tokenType] !== 'text') console.log(token);
+  let top = stack[stack.length - 1];
+  if (token[tokenType] === 'startTag') {
+    let element = {
+      type: 'element',
+      children: [],
+      attribute: [],
+      tagName: token[tag],
+    };
+
+    for (const p in token) {
+      element.attribute.push({
+        name: p,
+        value: token[p],
+      });
+    }
+
+    top.children.push(element);
+    element.parent = top;
+
+    if (!token.isSelfClosing) stack.push(element);
+  } else if (token[tokenType] === 'endTag') {
+    if (top.tagName !== token[tag]) {
+      throw Error('Start and End Tag not matched!');
+    } else {
+      stack.pop();
+    }
+  }
 }
 
 function data(c) {
@@ -39,6 +67,10 @@ function tagOpen(c) {
       [tokenType]: 'startTag',
       [tag]: '',
     };
+    Object.defineProperties(currentToken, {
+      tokenType: { enumerable: false },
+      tag: { enumerable: false },
+    });
     return tagName(c);
   } else {
     return;
@@ -51,6 +83,10 @@ function endTagOpen(c) {
       [tokenType]: 'endTag',
       [tag]: '',
     };
+    Object.defineProperties(currentToken, {
+      tokenType: { enumerable: false },
+      tag: { enumerable: false },
+    });
     return tagName(c);
   } else if (c === '>') {
   } else if (c === EOF) {
