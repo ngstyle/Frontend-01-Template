@@ -4,6 +4,8 @@ let currentToken = null;
 let currentAttribute = null;
 
 let stack = [{ type: 'document', children: [] }];
+let currentTextNode = null;
+
 let tokenType = Symbol('type');
 let tag = Symbol('tagName');
 
@@ -13,11 +15,11 @@ module.exports.parseHTML = function parseHTML(html) {
     state = state(c);
   }
   state = state(EOF);
+
+  return stack[0];
 };
 
 function emit(token) {
-  if (token[tokenType] === 'text') return;
-  // if (token[tokenType] !== 'text') console.log(token);
   let top = stack[stack.length - 1];
   if (token[tokenType] === 'startTag') {
     let element = {
@@ -38,12 +40,25 @@ function emit(token) {
     element.parent = top;
 
     if (!token.isSelfClosing) stack.push(element);
+
+    currentTextNode = null;
   } else if (token[tokenType] === 'endTag') {
     if (top.tagName !== token[tag]) {
       throw Error('Start and End Tag not matched!');
     } else {
       stack.pop();
     }
+
+    currentTextNode = null;
+  } else if (token[tokenType] === 'text') {
+    if (!currentTextNode) {
+      currentTextNode = {
+        type: 'text',
+        content: '',
+      };
+      top.children.push(currentTextNode);
+    }
+    currentTextNode.content += token.content;
   }
 }
 
