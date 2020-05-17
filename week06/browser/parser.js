@@ -1,3 +1,5 @@
+const parser = require('./css-parser.js');
+
 let state = data;
 let EOF = Symbol('EOF');
 let currentToken = null;
@@ -15,7 +17,6 @@ module.exports.parseHTML = function parseHTML(html) {
     state = state(c);
   }
   state = state(EOF);
-
   return stack[0];
 };
 
@@ -25,19 +26,20 @@ function emit(token) {
     let element = {
       type: 'element',
       children: [],
-      attribute: [],
+      attributes: [],
+      parent: top,
       tagName: token[tag],
     };
 
     for (const p in token) {
-      element.attribute.push({
+      element.attributes.push({
         name: p,
         value: token[p],
       });
     }
 
+    parser.computeCSS(element);
     top.children.push(element);
-    element.parent = top;
 
     if (!token.isSelfClosing) stack.push(element);
 
@@ -46,6 +48,9 @@ function emit(token) {
     if (top.tagName !== token[tag]) {
       throw Error('Start and End Tag not matched!');
     } else {
+      if (top.tagName === 'style') {
+        parser.addCSSRules(top.children[0].content);
+      }
       stack.pop();
     }
 

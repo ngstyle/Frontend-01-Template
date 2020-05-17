@@ -2,7 +2,7 @@ const http = require('http');
 
 const server = http.createServer((req, res) => {
   console.log('request received:' + new Date());
-  console.log(req.headers);
+  //   console.log(req.headers);
 
   res.setHeader('Content-Type', 'text/html');
   res.setHeader('X-Foo', 'bar');
@@ -11,20 +11,24 @@ const server = http.createServer((req, res) => {
   const body = `<html maaa=a >
     <head>
         <style>
-    body div #myid{
+    .ss,body div #myid{
         width:100px;
         background-color: #ff5000;
     }
+    body div .img{
+        width:300px;
+        background-color: #ff1111;
+    }
     body div img{
         width:30px;
-        background-color: #ff1111;
+        background-color: #ff1122;
     }
         </style>
     </head>
     <body>
         <div>
             <img id="myid"/>
-            <img id='myid2'/>
+            <img class='img second'/>
             <input name="username" placeHolders='user Name' type='text' required/>
         </div>
         <hr/>
