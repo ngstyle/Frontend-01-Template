@@ -8,7 +8,9 @@ module.exports.addCSSRules = function addCSSRules(text) {
 };
 
 module.exports.computeCSS = function computeCSS(element) {
+  // 仅计算head 标签内style 之后的标签
   if (!rules) return;
+
   let ancestors = [];
   let parent = element;
   while (parent) {
@@ -18,6 +20,21 @@ module.exports.computeCSS = function computeCSS(element) {
 
   if (!element.computedStyle) {
     element.computedStyle = {};
+
+    // 处理element style 属性
+    let styleAttr = element.attributes.find((attr) => attr.name === 'style');
+    if (styleAttr) {
+      const style = styleAttr.value.split(';');
+      style.forEach((declaration) => {
+        let [property, value] = declaration.split(':');
+
+        if (!element.computedStyle[property.trim()]) {
+          element.computedStyle[property.trim()] = {};
+        }
+        element.computedStyle[property.trim()].value = value.trim();
+        element.computedStyle[property.trim()].specificity = [1, 0, 0, 0];
+      });
+    }
   }
 
   for (const rule of rules) {
@@ -105,4 +122,5 @@ function compare(sp1, sp2) {
       return sp1[index] - sp2[index];
     }
   }
+  return 0;
 }
