@@ -26,13 +26,15 @@ module.exports.computeCSS = function computeCSS(element) {
     if (styleAttr) {
       const style = styleAttr.value.split(';');
       style.forEach((declaration) => {
-        let [property, value] = declaration.split(':');
+        let [property, value] = declaration
+          .split(':')
+          .map((item) => item.trim());
 
-        if (!element.computedStyle[property.trim()]) {
-          element.computedStyle[property.trim()] = {};
+        if (!element.computedStyle[property]) {
+          element.computedStyle[property] = {};
         }
-        element.computedStyle[property.trim()].value = value.trim();
-        element.computedStyle[property.trim()].specificity = [1, 0, 0, 0];
+        element.computedStyle[property].value = value.trim();
+        element.computedStyle[property].specificity = [1, 0, 0, 0];
       });
     }
   }
@@ -41,8 +43,9 @@ module.exports.computeCSS = function computeCSS(element) {
     let matched = false;
     // 从右向左匹配
 
-    // TODO rule.selectors 选择器数组，复合选择器时数组长度>1
+    // rule.selectors 选择器数组，复合选择器时数组长度>1
     for (const selector of rule.selectors) {
+      // TODO selector 复杂选择器
       let selectorParts = selector.split(' ').reverse();
       if (!match(element, selectorParts[0])) continue;
 
