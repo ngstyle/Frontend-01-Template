@@ -24,7 +24,7 @@ module.exports.computeCSS = function computeCSS(element) {
     // 处理element style 属性
     let styleAttr = element.attributes.find((attr) => attr.name === 'style');
     if (styleAttr) {
-      const style = styleAttr.value.split(';');
+      const style = styleAttr.value.split(';').filter((v) => v && v !== '');
       style.forEach((declaration) => {
         let [property, value] = declaration
           .split(':')
@@ -47,16 +47,22 @@ module.exports.computeCSS = function computeCSS(element) {
     for (const selector of rule.selectors) {
       // TODO selector 复杂选择器
       let selectorParts = selector.split(' ').reverse();
-      if (!match(element, selectorParts[0])) continue;
-
-      for (let i = 0, j = 1; i < ancestors.length; i++) {
-        if (match(ancestors[i], selectorParts[j])) {
-          if (++j >= selectorParts.length) {
-            // console.count('matched times');
-            matched = true;
-            break;
+      if (match(element, selectorParts[0])) {
+        if (selectorParts.length === 1) {
+          matched = true;
+        } else {
+          for (let i = 0, j = 1; i < ancestors.length; i++) {
+            if (match(ancestors[i], selectorParts[j])) {
+              if (++j >= selectorParts.length) {
+                matched = true;
+                break;
+              }
+            }
           }
         }
+      } else {
+        // 首个没匹配上
+        continue;
       }
 
       if (matched) {
@@ -81,7 +87,7 @@ module.exports.computeCSS = function computeCSS(element) {
           }
         }
 
-        console.log(element.computedStyle);
+        // console.log(element.computedStyle);
         break;
       }
     }

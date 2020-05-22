@@ -6,7 +6,7 @@ const server = http.createServer((req, res) => {
 
   res.setHeader('Content-Type', 'text/html');
   res.setHeader('X-Foo', 'bar');
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.writeHead(200, { 'Content-Type': 'text/html' });
   // <input type="text" required>
   const body = `<html maaa=a >
     <head>
@@ -23,13 +23,21 @@ const server = http.createServer((req, res) => {
         width:30px;
         background-color: #ff1122;
     }
+    .container {
+        display: flex;
+        justify-content: flex-end;
+        width:200px;
+    }
         </style>
     </head>
     <body>
         <div>
+            <div class='container'>
+                <div style="width:100px;height:100px;background:red;"> </div>
+                <div style="width:40px;height:40px;align-self:center;background: blue"> </div>
+            </div>
             <img id="myid" style="  width: 20%"/>
             <img class='img second'/>
-            <input name="username" placeHolders='user Name' type='text' required/>
         </div>
         <hr/>
     </body>
