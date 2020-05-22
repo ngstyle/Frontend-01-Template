@@ -147,7 +147,7 @@ function layout(element) {
 
   for (let i = 0; i < children.length; i++) {
     const child = children[i];
-    const childStyle = getStyle(children[i]);
+    const childStyle = getStyle(child);
 
     if (!childStyle[mainAxis.dimension]) {
       childStyle[mainAxis.dimension] = 0;
@@ -203,7 +203,104 @@ function layout(element) {
     }
   }
   flexLine.mainAxisSpace = mainAxis.space;
-  flexLine.crossAxisSpace = crossAxis.space;
+
+  if (style.flexWrap === 'nowrap' && isAutoMainDimension) {
+    flexLine.crossAxisSpace =
+      style[crossAxis.dimension] !== undefined
+        ? style[crossAxis.dimension]
+        : crossAxis.space;
+  } else {
+    flexLine.crossAxisSpace = crossAxis.space;
+  }
+
+  // 主轴剩余空间为负数
+  if (mainAxis.space < 0) {
+    // nowrap
+    let currentBase = mainAxis.base;
+    for (let i = 0; i < children.length; i++) {
+      const childStyle = getStyle(children[i]);
+
+      const scale =
+        style[mainAxis.dimension] /
+        (style[mainAxis.dimension] - mainAxis.space);
+
+      // 仅处理flex 值为单个数值的情况
+      if (childStyle.flex) {
+        childStyle[mainAxis.dimension] = 0;
+      }
+
+      childStyle[mainAxis.dimension] *= scale;
+      childStyle[mainAxis.start] = currentBase;
+      childStyle[mainAxis.end] =
+        childStyle[mainAxis.start] +
+        mainAxis.sign * childStyle[mainAxis.dimension];
+
+      currentBase = childStyle[mainAxis.end];
+    }
+  } else {
+    flexLines.forEach((line) => {
+      const mainAxisSpace = line.mainAxisSpace;
+      let flexTotal = 0;
+
+      for (let i = 0; i < line.length; i++) {
+        const childStyle = getStyle(line[i]);
+
+        // 仅处理flex 值为单个数值的情况
+        if (childStyle.flex !== null) {
+          flexTotal += childStyle.flex;
+        }
+      }
+
+      if (flexTotal > 0) {
+        // Flexible element in this line
+        let currentBase = mainAxis.base;
+        for (let i = 0; i < line.length; i++) {
+          const childStyle = getStyle(line[i]);
+
+          if (childStyle.flex) {
+            childStyle[mainAxis.dimension] =
+              (mainAxisSpace * childStyle.flex) / flexTotal;
+          }
+
+          childStyle[mainAxis.start] = currentBase;
+          childStyle[mainAxis.end] =
+            childStyle[mainAxis.start] +
+            mainAxis.sign * childStyle[mainAxis.dimension];
+
+          currentBase = childStyle[mainAxis.end];
+        }
+      } else {
+        // No flexible element here, handle...
+        let currentBase = mainAxis.base; // 起始位置
+        let step = 0; // 间距
+        if (style.justifyContent === 'flex-start') {
+          // default
+        } else if (style.justifyContent === 'flex-end') {
+          currentBase = mainAxis.space + mainAxisSpace * mainAxis.sign;
+        } else if (style.justifyContent === 'center') {
+          currentBase = mainAxis.space + (mainAxisSpace / 2) * mainAxis.sign;
+        } else if (style.justifyContent === 'space-between') {
+          step = (mainAxisSpace / (children.length - 1)) * mainAxis.sign;
+        } else if (style.justifyContent === 'space-around') {
+          step = (mainAxisSpace / children.length) * mainAxis.sign;
+          currentBase = step / 2 + mainAxis.base;
+        } else if (style.justifyContent === 'space-evenly') {
+          step = (mainAxisSpace / (children.length + 1)) * mainAxis.sign;
+          currentBase = step + mainAxis.base;
+        }
+
+        for (let i = 0; i < children.length; i++) {
+          // const child = children[i];
+          const childStyle = getStyle(children[i]);
+          childStyle[mainAxis.start] = currentBase;
+          childStyle[mainAxis.end] =
+            childStyle[mainAxis.start] +
+            mainAxis.sign * childStyle[mainAxis.dimension];
+          currentBase = childStyle[mainAxis.end] + step;
+        }
+      }
+    });
+  }
 }
 
 module.exports = layout;
