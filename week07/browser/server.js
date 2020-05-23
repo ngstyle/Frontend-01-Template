@@ -25,7 +25,8 @@ const server = http.createServer((req, res) => {
     }
     .container {
         display: flex;
-        justify-content: flex-end;
+        flex-wrap: wrap;
+        justify-content: space-between;
         width:200px;
     }
         </style>

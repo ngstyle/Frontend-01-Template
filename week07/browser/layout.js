@@ -7,9 +7,6 @@ function getStyle(element) {
     });
     element.style[formatterProp] = element.computedStyle[prop].value;
 
-    console.log(formatterProp);
-    // element.style[prop] = element.computedStyle[prop].value;
-
     if (element.style[formatterProp].toString().match(/px$/)) {
       element.style[formatterProp] = parseInt(element.style[formatterProp]);
     } else if (!Number.isNaN(Number(element.style[formatterProp].toString()))) {
@@ -192,8 +189,8 @@ function layout(element) {
       }
 
       if (
-        childStyle[crossAxis.dimension] !== null ||
-        childStyle[crossAxis.dimension] === 0
+        childStyle[crossAxis.dimension] !== null &&
+        childStyle[crossAxis.dimension] !== void 0
       ) {
         crossAxis.space = Math.max(
           crossAxis.space,
@@ -248,7 +245,7 @@ function layout(element) {
         const childStyle = getStyle(line[i]);
 
         // 仅处理flex 值为单个数值的情况
-        if (childStyle.flex !== null) {
+        if (childStyle.flex) {
           flexTotal += childStyle.flex;
         }
       }
@@ -292,8 +289,8 @@ function layout(element) {
           currentMainBase = step + mainAxis.base;
         }
 
-        for (let i = 0; i < children.length; i++) {
-          const childStyle = getStyle(children[i]);
+        for (let i = 0; i < line.length; i++) {
+          const childStyle = getStyle(line[i]);
           childStyle[mainAxis.start] = currentMainBase;
           childStyle[mainAxis.end] =
             childStyle[mainAxis.start] +
