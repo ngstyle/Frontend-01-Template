@@ -390,6 +390,9 @@ function layout(element) {
     currentCrossBase += crossAxis.sign * (lineCrossSize + step);
   });
 
+  console.log('=================== Element ==========================');
+  console.log(element);
+  console.log('=================== Children ==========================');
   console.log(children);
 }
 

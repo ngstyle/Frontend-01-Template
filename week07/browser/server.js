@@ -28,14 +28,15 @@ const server = http.createServer((req, res) => {
         flex-wrap: wrap;
         justify-content: space-between;
         width:200px;
+        background-color:rgb(255,255,255);
     }
         </style>
     </head>
     <body>
         <div>
             <div class='container'>
-                <div style="width:100px;height:100px;background:red;"> </div>
-                <div style="width:40px;height:40px;align-self:center;background: blue"> </div>
+                <div style="width:100px;height:100px;background-color:rgb(255,0,0);"> </div>
+                <div style="width:40px;height:40px;align-self:center;background-color:rgb(0,0,255);"> </div>
             </div>
             <img id="myid" style="  width: 20%"/>
             <img class='img second'/>

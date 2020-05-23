@@ -1,5 +1,6 @@
 const net = require('net');
 const parser = require('./parser.js');
+// const images = require('images');
 
 class Request {
   constructor(options) {
@@ -231,8 +232,11 @@ void (async function () {
   });
 
   let response = await request.send();
-  // console.log(response);
-  parser.parseHTML(response.body);
+  const dom = parser.parseHTML(response.body);
+
+  // let viewport = images(800, 600);
+  // render(viewport, dom);
+  // viewport.save('html.jpeg');
 })();
 
 /*const client = net.createConnection(
