@@ -16,64 +16,63 @@
       color: red;
     }
 
+    /* article span:nth-child(n+3) {
+      color: red;
+    } */
   </style>
 </head>
 
 <body>
+  <div>
 
-  <article id="a" class="b article">
-    <section class="s">
-      <input type="text number">
+    <article id="a" class="b article">
+      <section class="s">
+        <input type="text number">
 
-      <div>
-        <a href="">Link</a>
-        <span class="content span xx" id="test" data-value="7-11" title="title">some content</span>
+        <div id="container">
+          <a href="">Link</a>
+          <span class="content span xx" id="test" data-value="7-11" title="title">some content</span>
 
-        <!-- <p>
+          <!-- <p>
           grandchild or later descendant of a section element
         </p> -->
-      </div>
+        </div>
 
-      <p>
-        child of a section element
-      </p>
-    </section>
-  </article>
+        <p>
+          child of a section element
+        </p>
+      </section>
+    </article>
+  </div>
+
 
   <script>
 
-
-
     function match(selector, element) {
       // console.dir(element);
-      if (!selector || !element) {
+      if (!selector || !element)
         return false;
-      }
-      // 1. 处理非空格combinator 左右侧的空格，e.g: div a > b
-      selector = selector.trim().replace(/\s*([()>~+=^$*|])\s*/g, "$1");
+
+      // 1. 处理非空格combinator 其他元素左右侧的空格，e.g: div a > b => div a>b
+      selector = selector.trim().replace(/\s*([()>~+=^$|])\s*/g, "$1");
+      selector = selector.replace(/\s*(\*=)\s*/g, "$1");
       // console.log(selector);
 
-      // 2. 按空格combinator分割，反转获取第一个
-      const seleParts = selector.split(' ').reverse();
+      // 2. 按空格combinator分割，反转
+      const selectorParts = selector.split(' ').reverse();
 
-      // 3. 第一个节点匹配结果()
-      let result = childAndSiblingMatch(seleParts[0], element);
-      if (result.matched) {
-        element = result.element;
-      } else {
+      // 3. 获取第一段选择器与当前元素匹配
+      const result = childAndSiblingMatch(selectorParts.shift(), element);
+      if (!result.matched)
         return false;
-      }
+      element = result.element;
 
-      // 4. 前序空格隔断(祖先)的选择器
-      for (let i = 1; i < seleParts.length; i++) {
-        // console.log(seleParts[i]);
-        const part = seleParts[i];
-
+      // 4. 前序空格隔断的选择器与(祖先)元素匹配
+      for (const part of selectorParts) {
         let parentElement = element.parentElement;
-
         let ancestorMatched = false;
         while (parentElement !== null) {
-          let result = childAndSiblingMatch(part, parentElement);
+          const result = childAndSiblingMatch(part, parentElement);
           if (result.matched) {
             element = result.element;
             ancestorMatched = true;
@@ -94,12 +93,11 @@
         matched: false,
         element
       }
-      // 3. Seperate by Child combinators or Sibling combinators
+      // Seperate by Child combinators or Sibling combinators
       let matches = part.split(/([>+~](?!=|\d))/g).reverse();
-      // console.log(matches);
+      console.log(matches);
 
-      let firstMatched = simpleSelectorMatch(matches[0], element);
-      if (!firstMatched) {
+      if (!simpleSelectorMatch(matches[0], element)) {
         return result;
       }
 
@@ -326,7 +324,7 @@
     }
 
 
-    const selector = 'body .b>section [type ~= number] + div > [href] ~ span.content.span:nth-child(even):nth-of-type(1):last-child#test[title="title"][data-value |= "7"]';
+    const selector = 'body>div #a.article.b * [type ~= number] + div#container > [href] ~ span.content.span:nth-child(even):nth-of-type(1):last-child#test[title="title"][data-value |= "7"][data-value *= "7"]';
     const element = document.querySelector(selector);
     console.log(element);
 
