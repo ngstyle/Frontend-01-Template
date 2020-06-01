@@ -91,6 +91,7 @@
             ancestorMatched = true;
             break;
           }
+          parentElement = parentElement.parentElement;
         }
 
         if (!ancestorMatched) return false;
