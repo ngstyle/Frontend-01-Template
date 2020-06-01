@@ -46,7 +46,7 @@ api: getClientReacts()
 
 [Understanding CSS Layout And The Block Formatting Context](https://www.smashingmagazine.com/2017/12/understanding-css-layout-block-formatting-context/)
 
-[css进阶之十三：margin合并与margin无效]([https://zhyjor.github.io/2018/06/26/css%E8%BF%9B%E9%98%B6%E4%B9%8B%E5%8D%81%E4%B8%89%EF%BC%9Amargin%E5%B4%A9%E5%A1%8C/](https://zhyjor.github.io/2018/06/26/css进阶之十三：margin崩塌/))
+[css进阶之十三：margin合并与margin无效](https://zhyjor.github.io/2018/06/26/css进阶之十三：margin崩塌/)
 
 **margin 折叠**只发生在BFC中
 
