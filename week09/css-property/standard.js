@@ -27,13 +27,13 @@ void (async function () {
   console.log("standards count: " + standards.length);
 
   // const propMap = new Map();
+  let docCount = 0;
   let propCount = 0;
   let md =
-    "|   Standard    |   Property   |\n|   ----        |   ----       |\n";
+    "| NO. | Standard | Property | Subtotal |\n| ---- | ---- | ---- | ---- |\n";
 
-  // for (let [index, standard] of standards.slice(0, 5).entries()) {
+  // for (let [index, standard] of standards.slice(0, 4).entries()) {
   for (let [index, standard] of standards.entries()) {
-    console.log(`parse(${index}/${standards.length}) -> ${standard.url}`);
     response = await fetch(standard.url);
     text = await response.text();
     dom = await new JSDOM(text);
@@ -42,15 +42,43 @@ void (async function () {
       ...dom.window.document.querySelectorAll(
         ".propdef [data-dfn-type=property]"
       ),
-    ].map((e) => e.textContent);
+    ].map((dfn) => {
+      while (dfn.lastElementChild) {
+        console.count("----- ElementChild is not empty --------");
+        dfn.removeChild(dfn.lastElementChild);
+      }
+
+      let propdef = dfn.parentElement;
+      while (!propdef.className.includes("propdef")) {
+        propdef = propdef.parentElement;
+      }
+
+      let target = propdef.previousElementSibling;
+      while (target && !target.id) {
+        target = target.previousElementSibling;
+      }
+
+      return `[${dfn.textContent.trim()}](${standard.url}#${
+        target ? target.id : ""
+      })`;
+    });
 
     if (properties.length) {
-      md += `|[${standard.name}](${standard.url})|${properties.join(", ")}|\n`;
+      md += `|${++docCount}|[${standard.name}](${
+        standard.url
+      })|${properties.join(", ")}|${properties.length}|\n`;
       propCount += properties.length;
       // propMap.set(standard.name, properties.join(", "));
     }
+
+    console.log(
+      `parse(${index}/${standards.length})(${properties.length || 0}) -> ${
+        standard.url
+      }`
+    );
   }
 
+  md += `Total Property: ${propCount}`;
   // console.log(propMap);
   // console.log(md);
   console.log("Property count: " + propCount);
