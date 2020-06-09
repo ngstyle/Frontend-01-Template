@@ -30,7 +30,7 @@ void (async function () {
   let docCount = 0;
   let propCount = 0;
   let md =
-    "| NO. | Standard | Property | Subtotal |\n| ---- | ---- | ---- | ---- |\n";
+    "| NO. | Specification | Property | Status | Subtotal |\n| ---- | ---- | ---- | ---- | ---- |\n";
 
   // for (let [index, standard] of standards.slice(0, 4).entries()) {
   for (let [index, standard] of standards.entries()) {
@@ -66,7 +66,7 @@ void (async function () {
     if (properties.length) {
       md += `|${++docCount}|[${standard.name}](${
         standard.url
-      })|${properties.join(", ")}|${properties.length}|\n`;
+      })|${properties.join(", ")}|${standard.status}|${properties.length}|\n`;
       propCount += properties.length;
       // propMap.set(standard.name, properties.join(", "));
     }
@@ -78,7 +78,7 @@ void (async function () {
     );
   }
 
-  md += `Total Property: ${propCount}`;
+  md += `\nTotal Property: ${propCount}`;
   // console.log(propMap);
   // console.log(md);
   console.log("Property count: " + propCount);
