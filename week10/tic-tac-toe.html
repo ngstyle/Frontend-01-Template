@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    #board {
+      border: solid 1px green;
+    }
+
+    .cell {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      background: green;
+      border: solid 1px white;
+      vertical-align: bottom;
+      line-height: 100px;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <div id="board">
+  </div>
+
+  <script>
+    const pattern = [
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, 0
+    ];
+    let color = 1;
+    let isFinished = false;
+
+    function show() {
+      const board = document.querySelector('#board');
+      board.innerHTML = '';
+      for (const [k, v] of pattern.entries()) {
+        if (k && k % 3 === 0) {
+          const br = document.createElement('br');
+          board.append(br);
+        }
+
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.innerText = v === 2 ? '❌' : v === 1 ? '⭕️' : '';
+        cell.addEventListener('click', function () {
+          userMove(k);
+        });
+
+        board.append(cell);
+      }
+    }
+
+    function userMove(k) {
+      render(k);
+      computerMove();
+    }
+
+    function render(index) {
+      if (pattern[index] || isFinished)
+        return;
+
+      pattern[index] = color;
+      show();
+
+      if (check(pattern, color)) {
+        setTimeout(() => {
+          alert((color === 2 ? '❌' : color === 1 ? '⭕️' : '') + ' is winner!');
+        });
+        isFinished = true;
+      } else {
+        color = 3 - color;
+      }
+    }
+
+    function computerMove() {
+      const choice = bestChoice(pattern, color);
+      if (choice.point) {
+        // console.log('best choice: ' + choice.point);
+        let [x, y] = choice.point;
+        render(3 * y + x);
+      }
+    }
+
+    function check(pattern, color) {
+      let win = true;
+      // row
+      for (let y = 0; y < 3; y++) {
+        win = true;
+        for (let x = 0; x < 3; x++) {
+          if (pattern[y * 3 + x] !== color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) return true;
+      }
+
+      // col
+      for (let y = 0; y < 3; y++) {
+        win = true;
+        for (let x = 0; x < 3; x++) {
+          if (pattern[x * 3 + y] !== color) {
+            win = false;
+            break;
+          }
+        }
+        if (win) return true;
+      }
+
+      // diagonal 1
+      win = true;
+      for (let i = 0; i < 3; i++) {
+        if (pattern[i * 3 + 2 - i] !== color) {
+          win = false;
+          break;
+        }
+      }
+      if (win) return true;
+
+      // diagonal 2
+      win = true;
+      for (let i = 0; i < 3; i++) {
+        if (pattern[i * 3 + i] !== color) {
+          win = false;
+          break;
+        }
+      }
+      if (win) return true;
+    }
+
+    function winPoints(pattern, color) {
+      let points = [];
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 3; x++) {
+          if (pattern[y * 3 + x] !== 0)
+            continue;
+
+          pattern[y * 3 + x] = color;
+          if (check(pattern, color)) {
+            points.push([x, y]);
+          }
+          pattern[y * 3 + x] = 0;
+        }
+      }
+      return points;
+    }
+
+    function bestChoice(pattern, color) {
+      let points = winPoints(pattern, color);
+      if (points.length > 0) {
+        // 当前我方下棋的最好点
+        return {
+          point: points[0],
+          result: 1
+        }
+      }
+
+      let oppResult = 1;
+      let point = null;
+      outer: for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 3; x++) {
+          if (pattern[y * 3 + x] !== 0)
+            continue;
+
+          pattern[y * 3 + x] = color;
+          // 查找当前对面的最好点
+          const opponentChoice = bestChoice(pattern, 3 - color);
+          if (opponentChoice.result <= oppResult) {
+            oppResult = opponentChoice.result;
+            point = [x, y];
+          }
+          pattern[y * 3 + x] = 0;
+        }
+      }
+
+      return {
+        point,
+        result: point ? -oppResult : 0
+      }
+    }
+
+    show();
+
+  </script>
+</body>
+
+</html>
