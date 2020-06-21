@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .cell {
+      background-color: grey;
+      border-bottom: solid 1px white;
+      border-right: solid 1px white;
+    }
+
+    .action {
+      text-align: center;
+      padding: 12px;
+      width: 700px;
+      margin: 0 auto;
+    }
+
+    #container {
+      /* margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      width: 701px; */
+      margin: 0 auto;
+      display: grid;
+      width: 700px;
+      height: 700px;
+      grid-template-rows: repeat(100, 1fr);
+      grid-template-columns: repeat(100, 1fr);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+
+  <div class="action">
+    <button onclick="localStorage.map = JSON.stringify(map)">Save</button>
+    <button onclick="localStorage.map = ''">Clear</button>
+  </div>
+
+  <script>
+    class Sorted {
+      constructor(data, compartor) {
+        this.data = data;
+        this.compartor = compartor;
+      }
+
+      take() {
+        if (this.data.length === 0)
+          return;
+        let min = this.data[0];
+
+        let minIndex = 0;
+        for (let i = 1; i < this.data.length; i++) {
+          if (this.compartor(this.data[i], min) < 0) {
+            min = this.data[i];
+            minIndex = i;
+          }
+        }
+
+        this.data[minIndex] = this.data[this.data.length - 1];
+        this.data.pop();
+
+        return min;
+      }
+
+      insert(v) {
+        this.data.push(v);
+      }
+
+      get length() {
+        return this.data.length;
+      }
+    }
+
+    let map = localStorage.map ? JSON.parse(localStorage.map) : new Array(10000).fill(0);
+    const constainer = document.getElementById('container');
+    let mouseDown = false;
+    let rightButton = false;
+
+    for (let y = 0; y < 100; y++) {
+      for (let x = 0; x < 100; x++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+
+        if (map[y * 100 + x] === 1)
+          cell.style.backgroundColor = 'black';
+
+        cell.addEventListener('mouseover', () => {
+          if (mouseDown) {
+            cell.style.backgroundColor = rightButton ? 'grey' : 'black';
+            map[y * 100 + x] = rightButton ? 0 : 1;
+          }
+        })
+
+        constainer.append(cell);
+      }
+    }
+
+    document.addEventListener('mousedown', (e) => {
+      mouseDown = true;
+      rightButton = e.button === 2;
+    });
+    document.addEventListener('mouseup', () => mouseDown = false);
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+
+    function sleep(t) {
+      return new Promise(resolve => setTimeout(resolve, t))
+    }
+
+    async function findPath(map, start, end) {
+      map = map.slice();
+      // let queue = [start];
+
+      function distance(point) {
+        return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+      }
+
+      let sort = new Sorted([start], (a, b) => {
+        return distance(a) - distance(b);
+      });
+
+      async function insert([x, y], pre) {
+        if (x < 0 || y < 0 || x >= 100 || y >= 100)
+          return;
+        if (map[100 * y + x])
+          return;
+
+        await sleep(5);
+        constainer.children[100 * y + x].style.backgroundColor = 'lightgreen';
+
+        // 讲[x,y] 的上一个点存在 map的 100 * y + x 位置
+        map[100 * y + x] = pre;
+        // queue.push([x, y]);
+        sort.insert([x, y]);
+      }
+
+      while (sort.length) {
+        // let [x, y] = queue.shift();
+        let [x, y] = sort.take();
+        // 障碍不能走，超出边界不能走
+        if (x === end[0] && y === end[1]) {
+          let path = [];
+          while (x !== start[0] || y !== start[1]) {
+            path.push([x, y]);
+            constainer.children[100 * y + x].style.backgroundColor = 'pink';
+
+            // 取当前点的上一个点
+            [x, y] = map[y * 100 + x];
+          }
+          return path;
+        }
+        await insert([x - 1, y], [x, y]);
+        await insert([x + 1, y], [x, y]);
+        await insert([x, y - 1], [x, y]);
+        await insert([x, y + 1], [x, y]);
+
+        // 对角线
+        // 右上
+        if (map[y * 100 + x + 1] !== 1 || map[(y + 1) * 100 + x] !== 1) {
+          await insert([x + 1, y + 1], [x, y], 1);
+        }
+
+        // 右下
+        if (map[y * 100 + x + 1] !== 1 || map[(y - 1) * 100 + x] !== 1) {
+          await insert([x + 1, y - 1], [x, y], 2);
+        }
+
+        // 左上
+        if (map[y * 100 + x - 1] !== 1 || map[(y + 1) * 100 + x] !== 1) {
+          await insert([x - 1, y + 1], [x, y], 3);
+        }
+
+        // 左下
+        if (map[y * 100 + x - 1] !== 1 || map[(y - 1) * 100 + x] !== 1) {
+          await insert([x - 1, y - 1], [x, y], 4);
+        }
+      }
+
+      return null;
+    }
+
+  </script>
+</body>
+
+</html>
