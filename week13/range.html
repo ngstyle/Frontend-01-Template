@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="container">
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+    前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端 前端
+  </div>
+
+  <div id="dragable" style="width: 100px;height: 100px;background-color: pink; display: inline-block;"></div>
+
+  <script>
+    const container = document.getElementById('container');
+
+    let baseX = 0, baseY = 0;
+    const el = document.getElementById('dragable');
+    el.addEventListener('mousedown', (de) => {
+
+      const selectEvent = (e) => {
+        console.log('selectEvent');
+        e.preventDefault();
+      }
+      document.addEventListener('selectstart', selectEvent);
+
+      // console.log('down:' + de.clientX, de.clientY);
+      let [startX, startY] = [de.clientX, de.clientY];
+
+      const moveEvent = (me) => {
+        // console.log('move: ' + me.clientX, me.clientY);
+
+        // let [x, y] = [baseX + me.clientX - startX, baseY + me.clientY - startY];
+        // el.style.transform = `translate(${x}px,${y}px)`;
+
+        const range = nearestRange(me.clientX, me.clientY);
+        console.log(range.getBoundingClientRect());
+        range.insertNode(el);
+      };
+
+      const upEvent = (ue) => {
+        document.removeEventListener('selectstart', selectEvent);
+        // console.log('up');
+        [baseX, baseY] = [baseX + ue.clientX - startX, baseY + ue.clientY - startY];
+        document.removeEventListener('mousemove', moveEvent);
+        document.removeEventListener('mouseup', upEvent);
+      };
+
+      document.addEventListener('mousemove', moveEvent);
+      document.addEventListener('mouseup', upEvent);
+    });
+
+
+    let ranges = [];
+    for (let i = 0; i < container.childNodes[0].length; i++) {
+      const range = document.createRange();
+      range.setStart(container.childNodes[0], i);
+      range.setEnd(container.childNodes[0], i);
+
+      ranges.push(range);
+    }
+
+    function nearestRange(x0, y0) {
+      let nearst = null;
+      let distance = Infinity;
+
+      for (const range of ranges) {
+        const { x, y } = range.getBoundingClientRect();
+
+        let d = (x - x0) ** 2 + (y - y0) ** 2;
+        if (d < distance) {
+          nearst = range;
+          distance = d;
+        }
+      }
+      // console.log(distance);
+      return nearst;
+    }
+
+  </script>
+
+</body>
+
+</html>
