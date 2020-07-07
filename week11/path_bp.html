@@ -145,11 +145,14 @@
 
 
     function sleep(t) {
-      return new Promise(resolve => setTimeout(resolve, t || 0));
+      return new Promise(resolve => { setTimeout(resolve, t || 0) });
     }
 
     async function findPath(map, start, end) {
       map = map.slice();
+
+      table = new Array(10000);
+
       constainer.children[end[1] * 100 + end[0]].style.backgroundColor = 'red';
 
       function distance(point) {
@@ -159,19 +162,34 @@
       let bp = new BinaryHeap([start], (a, b) => {
         return distance(a) - distance(b);
       });
+      // table[start[1] * 100 + start[0]] = 0;
 
-      async function insert([x, y], pre, direction = 0) {
+      async function insert([x, y], [px, py], distanceFromStart) {
         // 超出边界不能走
         if (x < 0 || y < 0 || x >= 100 || y >= 100)
           return;
 
-        // 障碍不能走，不走回头路
-        if (map[100 * y + x])
+        // 障碍不能走
+        if (map[100 * y + x] === 1)
           return;
+
+        // if (distanceFromStart >= table[100 * y + x]) {
+        //   return;
+        // }
+
+        if (distanceFromStart >= map[100 * y + x].distance) {
+          return;
+        }
 
         constainer.children[100 * y + x].style.backgroundColor = 'skyblue';
         // 将[x,y] 的上一个点存在 map的 100 * y + x 位置
-        map[100 * y + x] = pre;
+        // map[100 * y + x] = [px, py];
+        // table[100 * y + x] = distanceFromStart;
+
+        map[100 * y + x] = {
+          point: [px, py],
+          distance: distanceFromStart
+        }
         bp.insert([x, y]);
 
         await sleep();
@@ -179,6 +197,8 @@
 
       while (bp.length) {
         let [x, y] = bp.take();
+        // let distanceFromStart = table[y * 100 + x];
+        let distanceFromStart = map[y * 100 + x].distance || 0;
 
         if (x === end[0] && y === end[1]) {
           let path = [];
@@ -190,34 +210,35 @@
               break;
 
             // 取当前点的上一个点
-            [x, y] = map[y * 100 + x];
+            // [x, y] = map[y * 100 + x];
+            [x, y] = map[y * 100 + x].point;
             await sleep(10);
           }
           return path;
         }
-        await insert([x - 1, y], [x, y]);
-        await insert([x + 1, y], [x, y]);
-        await insert([x, y - 1], [x, y]);
-        await insert([x, y + 1], [x, y]);
+        await insert([x - 1, y], [x, y], distanceFromStart + 10);
+        await insert([x + 1, y], [x, y], distanceFromStart + 10);
+        await insert([x, y - 1], [x, y], distanceFromStart + 10);
+        await insert([x, y + 1], [x, y], distanceFromStart + 10);
 
         // 右上
         if (map[y * 100 + x + 1] !== 1 || map[(y + 1) * 100 + x] !== 1) {
-          await insert([x + 1, y + 1], [x, y], 1);
+          await insert([x + 1, y + 1], [x, y], distanceFromStart + 14);
         }
 
         // 右下
         if (map[y * 100 + x + 1] !== 1 || map[(y - 1) * 100 + x] !== 1) {
-          await insert([x + 1, y - 1], [x, y], 2);
+          await insert([x + 1, y - 1], [x, y], distanceFromStart + 14);
         }
 
         // 左上
         if (map[y * 100 + x - 1] !== 1 || map[(y + 1) * 100 + x] !== 1) {
-          await insert([x - 1, y + 1], [x, y], 3);
+          await insert([x - 1, y + 1], [x, y], distanceFromStart + 14);
         }
 
         // 左下
         if (map[y * 100 + x - 1] !== 1 || map[(y - 1) * 100 + x] !== 1) {
-          await insert([x - 1, y - 1], [x, y], 4);
+          await insert([x - 1, y - 1], [x, y], distanceFromStart + 14);
         }
       }
 
