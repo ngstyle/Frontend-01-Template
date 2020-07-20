@@ -99,7 +99,7 @@ class Carousel {
       element.addEventListener("dragstart", (e) => e.preventDefault());
       return element;
     });
-    const root = <div class="carousel">{...children}</div>;
+    const root = <div class="carousel">{children}</div>;
 
     let position = 0;
     let nextPic = () => {
