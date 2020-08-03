@@ -13,6 +13,13 @@ module.exports = class extends Generator {
     this.helperMethod = function () {
       console.log("won't be called automatically");
     };
+
+    /*
+    // This makes `appname` a required argument.
+    this.argument("appname", { type: String, required: true });
+    // And you can then access it later; e.g.
+    this.log(this.options.appname);
+    */
   }
 
   // 1. Prefix method name by an underscore
@@ -22,6 +29,14 @@ module.exports = class extends Generator {
 
   // https://yeoman.io/authoring/running-context.html
   // priority
+  // initializing - Your initialization methods (checking current project state, getting configs, etc)
+  // prompting - Where you prompt users for options (where you’d call this.prompt())
+  // configuring - Saving configurations and configure the project (creating .editorconfig files and other metadata files)
+  // default - If the method name doesn’t match a priority, it will be pushed to this group.
+  // writing - Where you write the generator specific files (routes, controllers, etc)
+  // conflicts - Where conflicts are handled (used internally)
+  // install - Where installations are run (npm, bower)
+  // end - Called last, cleanup, say good bye, etc
   initializing() {
     this._method2();
     this._private_method();
@@ -33,6 +48,20 @@ module.exports = class extends Generator {
 
   _method2() {
     this.log("method 2 just ran");
+  }
+
+  paths() {
+    this.log(this.destinationRoot());
+    // returns '~/projects'
+
+    this.log(this.destinationPath("index.js"));
+    // returns '~/projects/index.js'
+
+    this.log(this.contextRoot);
+    // where the user is running yo
+
+    this.log(this.sourceRoot());
+    // returns './templates'
   }
 
   async prompting() {
@@ -51,8 +80,24 @@ module.exports = class extends Generator {
     ]);
   }
 
-  writing() {
+  _writing() {
     this.log("app name", this.answers.name);
     this.log("cool feature", this.answers.cool);
+
+    const pkgJson = {
+      devDependencies: {
+        eslint: "^3.15.0",
+      },
+      dependencies: {
+        react: "^16.2.0",
+      },
+    };
+
+    // Extend or create package.json file in destination path
+    this.fs.extendJSON(this.destinationPath("package.json"), pkgJson);
+  }
+
+  _install() {
+    this.npmInstall();
   }
 };
