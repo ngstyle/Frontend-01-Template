@@ -1,0 +1,10 @@
+{
+  "reporter": [
+    "text",
+    "html"
+  ],
+  "include": [
+    "src/**/*.js"
+  ],
+  "check-coverage": false
+}
