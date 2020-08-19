@@ -80,12 +80,10 @@ module.exports = class extends Generator {
   }
 
   _copyTpl(source, destination) {
-    if (!destination) {
-      destination = source;
-    }
+    if (!source) return;
     this.fs.copyTpl(
       this.templatePath(source),
-      this.destinationPath(destination)
+      this.destinationPath(destination || source)
     );
   }
 
