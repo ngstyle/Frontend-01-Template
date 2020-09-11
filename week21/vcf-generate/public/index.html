@@ -1,0 +1,53 @@
+<html>
+
+<head>
+  <title>Express</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+
+<body>
+  <h1>VCF</h1>
+  <p>Welcome to VCF</p>
+
+  <form class="needs-validation" action="/download" novalidate>
+    <div class="form-group">
+      <label for="prefix">号段</label>
+      <input type="tel" class="form-control" id="prefix" name="prefix" pattern="^1\d{6}$" required>
+      <small id="prefixHelp" class="form-text text-muted">手机号段，号码前7位</small>
+      <div class="invalid-feedback">
+        手机号段，需要输入手机号码前7位
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="count">个数</label>
+      <input type="number" class="form-control" id="count" name="count" pattern="^[1-9][0-9]*$">
+      <small id="countHelp" class="form-text text-muted">生成手机号码个数，默认500个</small>
+    </div>
+    <button type="submit" class="btn btn-primary">生成</button>
+  </form>
+</body>
+
+<script>
+  // Example starter JavaScript for disabling form submissions if there are invalid fields
+  (function () {
+    'use strict';
+    window.addEventListener('load', function () {
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      var forms = document.getElementsByClassName('needs-validation');
+      // Loop over them and prevent submission
+      var validation = Array.prototype.filter.call(forms, function (form) {
+        form.addEventListener('submit', function (event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
+</script>
+
+</html>
